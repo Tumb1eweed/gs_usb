@@ -44,13 +44,22 @@ class GsUsb:
         self.capability = None
         self.device_flags = None
 
-    def start(self, flags=(GS_CAN_MODE_NORMAL | GS_CAN_MODE_HW_TIMESTAMP)):
+    def start(
+        self,
+        flags=(GS_CAN_MODE_NORMAL | GS_CAN_MODE_HW_TIMESTAMP),
+        reset_device=True,
+    ):
         r"""
         Start gs_usb device
         :param flags: GS_CAN_MODE_LISTEN_ONLY, GS_CAN_MODE_HW_TIMESTAMP, etc.
+        :param reset_device: Reset the USB device before starting CAN. Disable
+                             this when a platform cannot reliably reopen the
+                             device after a USB reset.
         """
-        # Reset to support restart multiple times
-        self.gs_usb.reset()
+        # Reset to support restart multiple times unless the caller needs to
+        # preserve the current USB enumeration/handle.
+        if reset_device:
+            self.gs_usb.reset()
 
         # Detach usb from kernel driver in Linux/Unix system to perform IO
         if "windows" not in platform.system().lower() and self.gs_usb.is_kernel_driver_active(
